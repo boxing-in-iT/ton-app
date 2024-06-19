@@ -1,162 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Telegram Mini Apps Vanilla JS Sample App</title>
     <style>
-        body {
-            --bg-color: var(--tg-theme-bg-color);
-            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 48px 24px;
-            padding: 0;
-            color-scheme: var(--tg-color-scheme);
+      body {
+        --bg-color: var(--tg-theme-bg-color);
+        font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica,
+          Verdana, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--tg-theme-text-color);
+        margin: 48px 24px;
+        padding: 0;
+        color-scheme: var(--tg-color-scheme);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      a {
+        color: var(--tg-theme-link-color);
+      }
+      #viewport {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: var(--tg-viewport-stable-height, 100vh);
+        pointer-events: none;
+        transition: all 0.2s ease;
+      }
+      #viewport:after {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-width: 4px;
+        border-style: solid;
+        border-image: linear-gradient(
+            45deg,
+            rgba(64, 224, 208, 0.5),
+            rgba(173, 255, 47, 0.5)
+          )
+          1;
+      }
+
+      #viewport-params-size,
+      #viewport-params-expand {
+        content: attr(text);
+        position: absolute;
+        display: inline-block;
+        background: var(--tg-theme-link-color, rgb(64, 224, 208));
+        right: 4px;
+        left: auto;
+        font-size: 8px;
+        padding: 4px;
+        vertical-align: top;
+      }
+      #viewport-params-size {
+        top: 4px;
+      }
+      #viewport-params-expand {
+        top: 30px;
+      }
+
+      .box {
+        padding: 1em;
+        background: linear-gradient(to right, #283048, #859398);
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 24px;
+        border-radius: 15px;
+        margin: 0 0.5em;
+        font-size: 18px;
+      }
+
+      .container {
+        height: 90%;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .energy-display {
+        font-size: 24px;
+        margin: 10px;
+      }
+
+      .coin {
+        width: 150px;
+        height: 150px;
+        background-color: gold;
+        border-radius: 50%;
+        margin: 20px auto;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: black;
+        font-weight: bold;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s;
+      }
+
+      .coin:hover {
+        transform: scale(1.1);
+      }
+
+      .coin::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.5s, opacity 0.5s;
+      }
+
+      .coin.clicked::after {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+      }
+
+      .footer-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #ff8c00;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .btn:hover {
+        background: #ffa500;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 90%;
+        height: 90%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        color: black;
+        max-width: 90%;
+        width: 100%;
+        max-height: 90%;
+        overflow-y: auto;
+      }
+
+      .modal h2 {
+        margin-top: 0;
+      }
+
+      .modal p {
+        margin: 10px 0;
+      }
+
+      .investment-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      .investment-card {
+        background: #f5f5f5;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .investment-card h3 {
+        margin-top: 0;
+      }
+
+      @media (max-width: 600px) {
+        .modal-content {
+          max-width: 90%;
         }
 
-        a {
-            color: var(--tg-theme-link-color);
+        .investment-options {
+          grid-template-columns: 1fr;
         }
-        #viewport {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: var(--tg-viewport-stable-height, 100vh);
-            pointer-events: none;
-            transition: all .2s ease;
-        }
-        #viewport:after {
-            content: '';
-            display: block;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            border-width: 4px;
-            border-style: solid;
-            border-image: linear-gradient(45deg, rgba(64, 224, 208, .5), rgba(173, 255, 47, .5)) 1;
-        }
+      }
 
-        #viewport-params-size,
-        #viewport-params-expand {
-            content: attr(text);
-            position: absolute;
-            display: inline-block;
-            background: var(--tg-theme-link-color, rgb(64, 224, 208));
-            right: 4px;
-            left: auto;
-            font-size: 8px;
-            padding: 4px;
-            vertical-align: top;
-        }
-        #viewport-params-size {
-            top: 4px;
-        }
-        #viewport-params-expand {
-            top: 30px;
-        }
+      #points-container {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
     </style>
-</head>
-
-<body>
-    <main>
-        <div align="center">
-            <a href="https://ton.org/"><img width="48" src="./assets/tapps.png" alt="logo of telegram web apps"></a>
-        </div>
-        <h1>Modals</h1>
-        <button onclick="Telegram.WebApp.showAlert('Hello World!');">Launch Alert</button>
-        <button onclick="showPopup();">Launch Popup</button>
-
-        <h1>Links</h1>
-        <ul>
-            <li>
-                <a href="javascript:Telegram.WebApp.openTelegramLink('https://t.me/trendingapps');">Open link within Telegram</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://ton.org/');">Open link in external browser</a>
-            </li>
-            <li>
-                <a href="javascript:Telegram.WebApp.openLink('https://telegra.ph/api',{try_instant_view:true});">Open link inside Telegram webview</a>
-            </li>
-        </ul>
-
-        <h1>Buttons</h1>
-        <button onclick="Telegram.WebApp.expand();">Expand Webview</button>
-        <button onclick="toggleMainButton();">Toggle Main Button</button>
-    </main>
+  </head>
+  <body>
     <div id="viewport"></div>
     <div id="viewport-params-size"></div>
     <div id="viewport-params-expand"></div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <div class="container">
+      <div class="header-container">
+        <div class="box">
+          Earn per tap: <span id="points-per-click">1</span>
+        </div>
+        <div class="box">
+          Earnings per hour: <span id="earnings-per-hour">0</span>
+        </div>
+      </div>
+      <div id="points-container">Points: <span id="points">0</span></div>
+      <div id="coin" class="coin">💰</div>
+      <div class="footer-container">
+        <div class="energy-display">
+          Energy: <span id="energy">500</span> /
+          <span id="max-energy">500</span>
+        </div>
+        <div class="button-container">
+          <button id="upgrade-button" class="btn">Upgrade</button>
+          <button id="investment-button" class="btn">Investments</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="upgrade-modal" class="modal">
+      <div class="modal-content">
+        <h2>Upgrades</h2>
+        <p>Points per Click: <span id="points-per-click-display">1</span></p>
+        <button id="buy-points-upgrade" class="btn">
+          Buy +1 Points per Click (Cost:
+          <span id="points-per-click-cost">1000</span> Points)
+        </button>
+        <p>Max Energy: <span id="max-energy-display">500</span></p>
+        <button id="buy-energy-upgrade" class="btn">
+          Buy +100 Max Energy (Cost:
+          <span id="max-energy-cost">1000</span> Points)
+        </button>
+        <p>
+          Energy Regeneration Speed:
+          <span id="energy-regen-speed-display">1</span> per second
+        </p>
+        <button id="buy-energy-regen-upgrade" class="btn">
+          Buy +1 Energy Regeneration Speed (Cost:
+          <span id="energy-regen-speed-cost">1000</span> Points)
+        </button>
+        <button id="close-modal" class="btn">Close</button>
+      </div>
+    </div>
+
+    <div id="investment-modal" class="modal">
+      <div class="modal-content">
+        <h2>Investments</h2>
+        <div class="investment-options">
+          <div class="investment-card">
+            <h3>Investment 1</h3>
+            <p>
+              Cost: <span id="investment1-cost">10000</span> Points<br />
+              Earnings per Hour: <span id="investment1-earnings">50</span>
+              Points
+            </p>
+            <button id="buy-investment1" class="btn">Buy</button>
+          </div>
+          <div class="investment-card">
+            <h3>Investment 2</h3>
+            <p>
+              Cost: <span id="investment2-cost">50000</span> Points<br />
+              Earnings per Hour: <span id="investment2-earnings">250</span>
+              Points
+            </p>
+            <button id="buy-investment2" class="btn">Buy</button>
+          </div>
+        </div>
+        <button id="close-investment-modal" class="btn">Close</button>
+      </div>
+    </div>
+
     <script>
-        // Init TWA
-        Telegram.WebApp.ready();
+      window.addEventListener("DOMContentLoaded", () => {
+        let points = 0;
+        let pointsPerClick = 1;
+        let earningsPerHour = 0;
+        let energy = 500;
+        let maxEnergy = 500;
+        let energyRegenSpeed = 1;
+        let pointsPerClickCost = 1000;
+        let maxEnergyCost = 1000;
+        let energyRegenSpeedCost = 1000;
 
-        // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.documentElement.className = Telegram.WebApp.colorScheme;
-        });
+        const pointsContainer = document.getElementById("points");
+        const pointsPerClickDisplay =
+          document.getElementById("points-per-click");
+        const earningsPerHourDisplay =
+          document.getElementById("earnings-per-hour");
+        const energyDisplay = document.getElementById("energy");
+        const maxEnergyDisplay = document.getElementById("max-energy");
 
-        // Show main button
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Main Button'
-        });
-        Telegram.WebApp.MainButton.onClick(function () {
-            Telegram.WebApp.showAlert('Main Button was clicked')
-        });	
-        Telegram.WebApp.MainButton.show();
+        const pointsPerClickDisplayModal = document.getElementById(
+          "points-per-click-display"
+        );
+        const pointsPerClickCostDisplay = document.getElementById(
+          "points-per-click-cost"
+        );
+        const maxEnergyDisplayModal =
+          document.getElementById("max-energy-display");
+        const maxEnergyCostDisplay = document.getElementById("max-energy-cost");
+        const energyRegenSpeedDisplayModal = document.getElementById(
+          "energy-regen-speed-display"
+        );
+        const energyRegenSpeedCostDisplay = document.getElementById(
+          "energy-regen-speed-cost"
+        );
 
-        // Function to call showPopup API
-        function showPopup() {
-            Telegram.WebApp.showPopup({
-                title: 'Title',
-                message: 'Some message',
-                buttons: [
-                    {id: 'link', type: 'default', text: 'Open ton.org'},
-                    {type: 'cancel'},
-                ]
-            }, function(btn) {
-                if (btn === 'link') {
-                    Telegram.WebApp.openLink('https://ton.org/');
-                }
-            });
-        };
+        const coin = document.getElementById("coin");
+        const upgradeButton = document.getElementById("upgrade-button");
+        const investmentButton = document.getElementById("investment-button");
+        const upgradeModal = document.getElementById("upgrade-modal");
+        const closeModalButton = document.getElementById("close-modal");
+        const investmentModal = document.getElementById("investment-modal");
+        const closeInvestmentModalButton = document.getElementById(
+          "close-investment-modal"
+        );
 
-        // Function to toggle main TWA button
-        function toggleMainButton() {
-            if (Telegram.WebApp.MainButton.isVisible) {
-                Telegram.WebApp.MainButton.hide();
-            } else {
-                Telegram.WebApp.MainButton.show();
-            }
-        };
+        const buyPointsUpgrade = document.getElementById("buy-points-upgrade");
+        const buyEnergyUpgrade = document.getElementById("buy-energy-upgrade");
+        const buyEnergyRegenUpgrade = document.getElementById(
+          "buy-energy-regen-upgrade"
+        );
 
-        function setViewportData() {
-            var sizeEl = document.getElementById('viewport-params-size');
-            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-                'height: ' + Telegram.WebApp.viewportStableHeight;
+        const buyInvestment1 = document.getElementById("buy-investment1");
+        const buyInvestment2 = document.getElementById("buy-investment2");
 
-            var expandEl = document.querySelector('#viewport-params-expand');
-            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
+        function updateDisplays() {
+          pointsContainer.textContent = points;
+          pointsPerClickDisplay.textContent = pointsPerClick;
+          earningsPerHourDisplay.textContent = earningsPerHour;
+          energyDisplay.textContent = energy;
+          maxEnergyDisplay.textContent = maxEnergy;
+
+          pointsPerClickDisplayModal.textContent = pointsPerClick;
+          pointsPerClickCostDisplay.textContent = pointsPerClickCost;
+          maxEnergyDisplayModal.textContent = maxEnergy;
+          maxEnergyCostDisplay.textContent = maxEnergyCost;
+          energyRegenSpeedDisplayModal.textContent = energyRegenSpeed;
+          energyRegenSpeedCostDisplay.textContent = energyRegenSpeedCost;
         }
 
-        Telegram.WebApp.setHeaderColor('secondary_bg_color');
+        function addPoints() {
+          if (energy > 0) {
+            points += pointsPerClick;
+            energy--;
+            updateDisplays();
+          } else {
+            alert("Not enough energy!");
+          }
+        }
 
-        setViewportData();
-        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+        function buyUpgrade(upgradeType) {
+          if (
+            upgradeType === "pointsPerClick" &&
+            points >= pointsPerClickCost
+          ) {
+            points -= pointsPerClickCost;
+            pointsPerClick++;
+            pointsPerClickCost *= 2;
+          } else if (upgradeType === "maxEnergy" && points >= maxEnergyCost) {
+            points -= maxEnergyCost;
+            maxEnergy += 100;
+            energy += 100;
+            maxEnergyCost *= 2;
+          } else if (
+            upgradeType === "energyRegenSpeed" &&
+            points >= energyRegenSpeedCost
+          ) {
+            points -= energyRegenSpeedCost;
+            energyRegenSpeed++;
+            energyRegenSpeedCost *= 2;
+          } else {
+            alert("Not enough points!");
+          }
+          updateDisplays();
+        }
 
-        Telegram.WebApp.onEvent('themeChanged', function() {
-            document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
+        function buyInvestment(investmentType) {
+          if (investmentType === "investment1" && points >= 10000) {
+            points -= 10000;
+            earningsPerHour += 50;
+          } else if (investmentType === "investment2" && points >= 50000) {
+            points -= 50000;
+            earningsPerHour += 250;
+          } else {
+            alert("Not enough points!");
+          }
+          updateDisplays();
+        }
+
+        function regenerateEnergy() {
+          if (energy < maxEnergy) {
+            energy += energyRegenSpeed;
+            if (energy > maxEnergy) {
+              energy = maxEnergy;
+            }
+            updateDisplays();
+          }
+        }
+
+        function addEarnings() {
+          points += earningsPerHour / 3600;
+          updateDisplays();
+        }
+
+        setInterval(regenerateEnergy, 1000);
+        setInterval(addEarnings, 1000);
+
+        coin.addEventListener("click", addPoints);
+        upgradeButton.addEventListener("click", () => {
+          upgradeModal.style.display = "flex";
+        });
+        investmentButton.addEventListener("click", () => {
+          investmentModal.style.display = "flex";
+        });
+        closeModalButton.addEventListener("click", () => {
+          upgradeModal.style.display = "none";
+        });
+        closeInvestmentModalButton.addEventListener("click", () => {
+          investmentModal.style.display = "none";
         });
 
-    </script>
+        buyPointsUpgrade.addEventListener("click", () => {
+          buyUpgrade("pointsPerClick");
+        });
+        buyEnergyUpgrade.addEventListener("click", () => {
+          buyUpgrade("maxEnergy");
+        });
+        buyEnergyRegenUpgrade.addEventListener("click", () => {
+          buyUpgrade("energyRegenSpeed");
+        });
 
-    <!-- Eruda is console for mobile browsers -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-</body>
+        buyInvestment1.addEventListener("click", () => {
+          buyInvestment("investment1");
+        });
+        buyInvestment2.addEventListener("click", () => {
+          buyInvestment("investment2");
+        });
+
+        updateDisplays();
+      });
+    </script>
+  </body>
 </html>
