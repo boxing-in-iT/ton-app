@@ -10,68 +10,20 @@
     <title>Telegram Mini Apps Vanilla JS Sample App</title>
     <style>
       body {
-        --bg-color: var(--tg-theme-bg-color);
-        font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica,
-          Verdana, sans-serif;
-        background-color: var(--bg-color);
-        color: var(--tg-theme-text-color);
-        margin: 48px 24px;
-        padding: 0;
-        color-scheme: var(--tg-color-scheme);
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        overflow: hidden;
-      }
-
-      a {
-        color: var(--tg-theme-link-color);
-      }
-      #viewport {
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: var(--tg-viewport-stable-height, 100vh);
-        pointer-events: none;
-        transition: all 0.2s ease;
-      }
-      #viewport:after {
-        content: "";
-        display: block;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        border-width: 4px;
-        border-style: solid;
-        border-image: linear-gradient(
-            45deg,
-            rgba(64, 224, 208, 0.5),
-            rgba(173, 255, 47, 0.5)
-          )
-          1;
-      }
-
-      #viewport-params-size,
-      #viewport-params-expand {
-        content: attr(text);
-        position: absolute;
-        display: inline-block;
-        background: var(--tg-theme-link-color, rgb(64, 224, 208));
-        right: 4px;
-        left: auto;
-        font-size: 8px;
-        padding: 4px;
-        vertical-align: top;
-      }
-      #viewport-params-size {
-        top: 4px;
-      }
-      #viewport-params-expand {
-        top: 30px;
+        margin: 0;
+        font-family: "Roboto", sans-serif;
+        background: radial-gradient(
+          circle,
+          rgba(2, 0, 36, 1) 0%,
+          rgba(62, 62, 131, 1) 100%,
+          rgba(0, 212, 255, 1) 100%
+        );
+        color: #fff;
+        overflow: hidden; /* Prevents the body from scrolling */
       }
 
       .box {
@@ -187,7 +139,7 @@
         background-color: rgba(0, 0, 0, 0.5);
         justify-content: center;
         align-items: center;
-        overflow: auto;
+        overflow: auto; /* Ensures the modal is scrollable if content overflows */
         padding: 20px;
       }
 
@@ -199,8 +151,8 @@
         color: black;
         max-width: 90%;
         width: 100%;
-        max-height: 90%;
-        overflow-y: auto;
+        max-height: 90%; /* Ensures the modal content fits within the viewport */
+        overflow-y: auto; /* Makes the modal content scrollable */
       }
 
       .modal h2 {
@@ -230,7 +182,7 @@
 
       @media (max-width: 600px) {
         .modal-content {
-          max-width: 90%;
+          max-width: 90%; /* Ensures the modal content is responsive on small screens */
         }
 
         .investment-options {
@@ -238,6 +190,7 @@
         }
       }
 
+      /* Additional styles for points container */
       #points-container {
         font-size: 24px;
         font-weight: bold;
@@ -246,9 +199,6 @@
     </style>
   </head>
   <body>
-    <div id="viewport"></div>
-    <div id="viewport-params-size"></div>
-    <div id="viewport-params-expand"></div>
     <div class="container">
       <div class="header-container">
         <div class="box">
